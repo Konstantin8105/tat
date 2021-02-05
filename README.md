@@ -1,0 +1,2 @@
+# tat
+go generic proposal
