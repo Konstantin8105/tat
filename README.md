@@ -9,10 +9,10 @@ package main
 
 import "fmt"
 
-// T is slice of types
+// T is slice of types.
 var T = []type{int, float32}
 
-// summ resurn summa of values
+// summ resurn summary of values
 func summ(vs ...T) T {
 	var res T
 	for _, v := range vs{
@@ -27,13 +27,43 @@ func main() {
 }
 ```
 
-Prototypes:
+For present language design:
 
 * [int](https://play.golang.org/p/ppF1FDjBAqh)
 * [float32](https://play.golang.org/p/R6BvhLTbgGN)
 
 
 ## Type list manipulation
+
+Type list:
+* always slice of types
+* slice is limited
+* no `any`
+* name of variable accepted for [export](https://golang.org/ref/spec#Exported_identifiers)
+
+Acceptable type list initialization:
+``` go
+// Empty is empty list of types.
+// Exported.
+var Empty []type
+
+// ut is list of unsigned types.
+// Not exported.
+var ut = []type{uint, uint8, uint16, uint32, uint64}
+
+// num is list of types from package `types`
+var num = types.Numbers
+```
+
+Not acceptable list of types:
+```go
+var (
+    One  type = int // Error : type `type` is not slice of type `[]type`.
+    Many []type = _ // Error : slice of types is not limited.
+)
+```
+
+
 
 ```go
 package tools
