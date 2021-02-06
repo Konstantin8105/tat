@@ -74,11 +74,11 @@ Create a copy of type slice
 ```go
 var (
     N  = []type{float32, float64}
-	NC []type
+    NC []type
 )
 
 func init() {
-	NC = N
+    NC = N
 }
 ```
 
@@ -87,7 +87,7 @@ Append new type
 var N []type
 
 func init() {
-	N = append(N, float64)
+    N = append(N, float64)
 }
 ```
 
@@ -95,13 +95,13 @@ Append type slice to type slice
 ```go
 var (
     floats = []type{float32,float64}
-	ints  = []type{int,int32,int64}
-	mix   []type
+    ints  = []type{int,int32,int64}
+    mix   []type
 )
 
 func init() {
-	mix = append(mix, floats...)
-	mix = append(mix, ints...)
+    mix = append(mix, floats...)
+    mix = append(mix, ints...)
 }
 ```
 
@@ -112,7 +112,23 @@ package main
 import "types"
 
 func init() {
-	types.Numbers = append(types.Numbers, float64)
+    types.Numbers = append(types.Numbers, float64)
+}
+```
+
+Remove type from external package
+```go
+package main
+
+import "types"
+
+func init() {
+    for i,t := range types.Numbers{
+        if t.(type) == uint32 {
+			types.Numbers = append(types.Numbers[:i], types.Numbers[i+1:]...)
+            break
+        }
+    }
 }
 ```
 
