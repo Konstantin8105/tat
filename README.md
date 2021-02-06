@@ -1,6 +1,13 @@
 # Type of type
 
-Main goal of proposal is try to avoid strange too long type clarification `func New[Node NodeConstraint[Edge], Edge EdgeConstraint[Node]] (nodes []Node) *Graph[Node, Edge] ` [code](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md).
+In according to question [template](https://github.com/golang/proposal/blob/master/go2-language-changes.md):
+* I create enought Go code and I am not a novice Go programmer.
+* Another programming languages in my experience: C, C++, Java.
+* In my point of view, that design - add new think: *variables have type the type*.
+* Yes, my design is look more native for Go in my point of view. But I see a few nice designs and I add links in my text.
+* Main goal of proposal is try to avoid strange too long type clarification `func New[Node NodeConstraint[Edge], Edge EdgeConstraint[Node]] (nodes []Node) *Graph[Node, Edge] ` [code](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md).
+
+
 
 ## Minimal example
 
@@ -23,9 +30,13 @@ func summ(vs ...T) T {
 
 func main() {
     fmt.Printf("%d\n", summ[T:int](1,2,3,4))                  // show "10"
+    fmt.Printf("%T\n", summ[T:int])                           // show "func (...int) int"
     fmt.Printf("%.2f\n", summ[T:float32](1.0, 2.0, 3.0, 4.0)) // show "10.00"
     //                       -----------
     //                      specific type
+
+    fmt.Printf("%d\n", summ(1,2,3,4))          // Error: type T is undefined
+    fmt.Printf("%d\n", summ[T:int32](1,2,3,4)) // Error: type `int32` is not in types slice T
 }
 ```
 
@@ -136,7 +147,8 @@ func init() {
 ### Scope
 
 Type slice is cannot by changed in any functions, methods, except 
-function `func init() {...}`.
+function `func init() {...}`. So, we can create a tests for avoid
+some types in types slice.
 
 ```go
 package main
@@ -249,7 +261,48 @@ func main(){
 }
 ```
 
+**Example 3**
+
+Example based on code from 
+https://github.com/golang/proposal/blob/master/design/15292/2013-12-type-params.md#syntax
+```go
+// This defines `T` as a type parameter for the parameterized type `List`.
+var T = []type{int, float32}
+
+type List struct {
+    element T
+    next *List[T]
+}
+
+type ListInt List[T:int]
+var v1 List[T:float32]
+var v2 List[T: ListInt]
+var v3 List[T: List] // Error: List[T] is undefined
+
+type S struct { f T }
+func L(n int, e T) interface{} {
+    if n == 0 {
+        return e
+    }
+    // return L(n-1, S{f:e}) // Error: type T of struct S is undefined
+    return L(n-1, S[T:T]{f:e})
+}
+
+
+// Example of using: 
+// f := Counter[T:int]()
+func Counter() func() T {
+	var c T
+	return func() T {
+		c++
+		return c
+	}
+}
+```
+
 ### Generic prototype with few types slice
+
+**Example 1**
 
 External package `tools` with empty types slice
 
@@ -281,6 +334,73 @@ func init() {
 func main() {
     fmt.Println(tools.Summ[Num1: int, Num2: float32, Num3: float64](1,2.1))    // show: 3.1
     fmt.Println(tools.Summ[Num1: float64, Num2: float32, Num3: int](3.14,2.7)) // show: 5
+}
+```
+
+**Example 2**
+
+Swap types
+```go
+type T, T2 []type
+
+type S struct{t T, t2 T2}
+
+// SwapTypes have argument and return type `struct S`, but that
+// struct have different types
+func SwapTypes(s S) S {
+	return S[T:T2, T2:T]{t: T2(s.t), t2: T(s.t2)}
+}
+```
+
+**Example 3**
+
+Example based on code from 
+https://github.com/golang/proposal/blob/master/design/15292/2013-12-type-params.md#syntax
+```go
+var T []type
+var T2 []type
+type (
+    MyMap  map[T]T2     // Error: type T, T2 is undefined
+    MyMap2 map[T:int]T2 // Error: type T2 is undefined
+)
+```
+
+```go
+package hashmap
+
+var K, V []type
+
+type bucket struct {
+	next *bucket
+	key K
+	val V
+}
+
+type Hashfn func(K) uint
+type Eqfn func(K, K) bool
+
+type Hashmap struct {
+	hashfn Hashfn[K]
+	eqfn Eqfn[K]
+	buckets []bucket[K, V]
+	entries int
+}
+
+// Example of using:
+// h := hashmap.New[K:int, V:string](hashfn, eqfn)
+func New(hashfn Hashfn, eqfn Eqfn) *Hashmap {
+	// Type parameters of Hashmap deduced as [K, V].
+	return &Hashmap[K:K, V:V]{hashfn, eqfn, make([]bucket, 16), 0}
+}
+
+func (p *Hashmap) Lookup(key K) (val V, found bool) {
+	h := p.hashfn(key) % len(p.buckets)
+	for b := p.buckets[h]; b != nil; b = b.next {
+		if p.eqfn(key, b.key) {
+			return b.val, true
+		}
+	}
+	return
 }
 ```
 
