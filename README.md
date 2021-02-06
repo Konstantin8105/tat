@@ -1,6 +1,6 @@
 # Type of type
 
-Main goals of proposal is try to avoid strange too long type clarification `func New[Node NodeConstraint[Edge], Edge EdgeConstraint[Node]] (nodes []Node) *Graph[Node, Edge] ` [code](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md).
+Main goal of proposal is try to avoid strange too long type clarification `func New[Node NodeConstraint[Edge], Edge EdgeConstraint[Node]] (nodes []Node) *Graph[Node, Edge] ` [code](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md).
 
 ## Minimal example
 
@@ -22,35 +22,15 @@ func summ(vs ...T) T {
 }
 
 func main() {
-	fmt.Printf("%d\n", summ(1,2,3,4))              // show "10"
-	fmt.Printf("%.2f\n", summ(1.0, 2.0, 3.0, 4.0)) // show "10.00"
+	fmt.Printf("%d\n", summ[T:int](1,2,3,4))                  // show "10"
+	fmt.Printf("%.2f\n", summ[T:float32](1.0, 2.0, 3.0, 4.0)) // show "10.00"
 }
 ```
 
-Examples:
+Prototypes:
 
 * [int](https://play.golang.org/p/ppF1FDjBAqh)
 * [float32](https://play.golang.org/p/R6BvhLTbgGN)
-
-
-
-
-
-
-
-* types list manipulations:
-    * initialization
-    * append new type
-    * remove type from generic type list
-* create generic from exist not prepare generic functions, structs, packages
-
-
-
-
-
-
-
-
 
 
 ## Type list manipulation
@@ -190,6 +170,31 @@ func main(){
     }
 }
 ```
+
+
+
+
+
+
+
+
+
+* types list manipulations:
+    * initialization
+    * append new type
+    * remove type from generic type list
+* create generic from exist not prepare generic functions, structs, packages
+
+
+
+
+
+
+
+
+
+
+
 
 ##  Empty generic
 
