@@ -14,16 +14,18 @@ var T = []type{int, float32}
 
 // summ resurn summary of values
 func summ(vs ...T) T {
-	var res T
-	for _, v := range vs{
-		res += v
-	}
-	return res
+    var res T
+    for _, v := range vs{
+        res += v
+    }
+    return res
 }
 
 func main() {
-	fmt.Printf("%d\n", summ[T:int](1,2,3,4))                  // show "10"
-	fmt.Printf("%.2f\n", summ[T:float32](1.0, 2.0, 3.0, 4.0)) // show "10.00"
+    fmt.Printf("%d\n", summ[T:int](1,2,3,4))                  // show "10"
+    fmt.Printf("%.2f\n", summ[T:float32](1.0, 2.0, 3.0, 4.0)) // show "10.00"
+    //                       -----------
+    //                      specific type
 }
 ```
 
@@ -33,15 +35,15 @@ For present language design:
 * [float32](https://play.golang.org/p/R6BvhLTbgGN)
 
 
-## Type slice manipulation
+## Types slice manipulation
 
-Type slice:
+Types slice:
 * always slice of types
 * slice is limited
 * no `any`
 * name of variable accepted for [export](https://golang.org/ref/spec#Exported_identifiers)
 
-### Acceptable type slice initialization
+### Acceptable types slice initialization
 
 ``` go
 // Empty is empty slice of types.
@@ -52,9 +54,8 @@ var Empty []type
 // Not exported.
 var ut = []type{uint, uint8, uint16, uint32, uint64}
 
-// num is slice of types from package `types`
+// num is slice of types from external package `types`
 var num = types.Numbers
-
 ```
 
 ### Not acceptable slice of types
@@ -70,7 +71,7 @@ type A = One // Error : type `One` is not a type
 
 ### Useful operations
 
-Create a copy of type slice
+Create a copy of types slice
 ```go
 var (
     N  = []type{float32, float64}
@@ -91,7 +92,7 @@ func init() {
 }
 ```
 
-Append type slice to type slice
+Append types slice to types slice
 ```go
 var (
     floats = []type{float32,float64}
@@ -125,195 +126,78 @@ import "types"
 func init() {
     for i,t := range types.Numbers{
         if t.(type) == uint32 {
-			types.Numbers = append(types.Numbers[:i], types.Numbers[i+1:]...)
+            types.Numbers = append(types.Numbers[:i], types.Numbers[i+1:]...)
             break
         }
     }
 }
 ```
 
+### Scope
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```go
-package tools
-
-// package with typical slices of types
-import "go/generic/types"
-
-// Variable of type is slice always, except constants
-
-// Acceptable
-const ConFloat64 type = float64
-
-var (
-    // Not acceptable, because it is not constant.
-    // One type = int
-
-    // Variable of unsigned types
-    Unumeric = []type{uint, uint8, uint16, uint32, uint64}
-
-    // Variable `numeric` is slice of types
-    // Upper case for acceptable adding types at external packages
-    Numeric  = []type{int, int8, int16, int32, int64, float32, float64}
-    Numeric2 = number
-    // Another way of type slice initialization is use standart library, like:
-    // Numeric = types.Numbers
-
-    // Type is cannot be any
-    // In my point of view, list of types is finite always
-    // T []type = any
-
-    // Empty types
-    V []type
-)
-
-func init() {
-    // Add more acceptable types in numerics
-    Numeric = append(Numeric, Unumeric)
-    Numeric2 = append(Numeric, Unumeric)
-    // Now, numerics types have unsigned types
-
-    // If we want remove some type
-    for i,t := range Numeric{
-        if t.(type) == uint32 {
-            Numeric = append(Numeric[:i], Numeric[i+1:])
-            break
-        }
-    }
-}
-
-// Min return minimal of 2 number with same type
-func Min(a, b Numeric) Numeric {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-// Max return maximum of 2 number with same type
-func Max(a, b Numeric) Numeric {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-// Summ return summa of 2 numbers of 2 different types.
-func Summ(a Numeric, b Numeric2) float64 {
-	return float64(a) + float64(b)
-}
-
-// Reverse elements in slice
-func Reverse(s []V) {
-    first := 0
-    last := len(s) - 1
-    for first < last {
-        s[first], s[last] = s[last], s[first]
-        first++
-        last--
-    }
-}
-
-// For that is not acceptable any not 64 bit types.
-// So, used constant type.
-func Float64bits(f ConFloat64) uint64 {
-    return *(*uint64)(unsafe.Pointer(&f))
-}
-```
-
-Example of using:
+Type slice is cannot by changed in any functions, methods, except 
+function `func init() {...}`.
 
 ```go
 package main
 
-import (
-    "fmt"
-    "strings"
-    "Konstantin8105/tools"
-)
+import "fmt"
 
-// Appending in any types variable is not accepted to use inside
-// any functions, methods, except function `init`
-func init(){
-    // Registration needed types in V
-    V = append(V, string)
-}
+var floats =[]type{float32, float64}
 
-func main(){
-    // Example of using with `V=string`
-    s := []string{"world", ",", "Hello"}
-    fmt.Println(strings.Join(s, " "))
-    tools.Reverse(s)
-    fmt.Println(strings.Join(s, " ")) // Result: "Hello , world"
+func main() {
+    floats = append(float32, int) // Error: cannot append types slice
+    floats[0] = int               // Error: cannot change types slice
 
-    // Not acceptable, because V is have not type: float64.
-    // fs := []float64{2.7,3.14}
-    // tools.Reverse(fs)
+	floats[0],floats[1] = floats[1], floats[0] // Error: cannot change types slice
 
-    // Example of using function with same type
-    fmt.Println(tools.Min(2.7, 3.6)) // return type is float64
-    fmt.Println(tools.Min(2, 3))     // return type is int
-
-    // Example with different types
-    fmt.Println(tools.Summ(2.7,15)) // For that case number 15 is not clear type - int or float64.
-    fmt.Println(tools.Summ(2.7,float64(15))) // May better clarify.
-    fmt.Println(tools.Summ(0.2,2.)) // Both types are float64. return "2.2"
-
-    // Print generic functions
-    fmt.Printf("%T\n", tools.Min) // print : "tools.Min is generic function"
-
-    // Slice of generic functions
-    sf := []func(tools.Numeric, tools.Numeric)tools.Numeric{tools.Min, tools.Max}
-    for _, v := range sf{
-        fmt.Println(v(8.3, 4.5))
-    }
+	fmt.Println(floats) // Show : "[]type{float32, float64}"
+	for i, v := range floats{
+		fmt.Println(v) // Show correctly types slice per line
+	}
 }
 ```
 
+### Generic prototype with one types slice
 
+**Examlpe 1**
 
+External package `tools` with empty types slice
 
+```go
+package tools
 
+var Numeric []type // empty types slice
 
+// Min return minimal of 2 number with same type
+func Min(a, b Numeric) Numeric {
+    if a < b {
+        return a
+    }
+    return b
+}
+```
+Use package `tools`:
 
+```go
+package main
 
+import "fmt"
+import "tools"
 
-* types list manipulations:
-    * initialization
-    * append new type
-    * remove type from generic type list
-* create generic from exist not prepare generic functions, structs, packages
+func init() {
+    tools.Numeric = append(tools.Numeric, int, float32)
+}
 
+func main() {
+    fmt.Println(tools.Min[Numeric: int](1,2))          // show: 1
+    fmt.Println(tools.Min[Numeric: float32](1.2,-2.1)) // show: -2.1
+}
+```
 
+**Example 2**
 
-
-
-
-
-
-
-
-
-
-##  Empty generic
-
-### Struct with single type
-
-Example based on code from https://blog.golang.org/why-generics, in my point of view no need additionally add type clarification.
+Example based on code from https://blog.golang.org/why-generics.
 
 ```go
 package tree
@@ -351,19 +235,83 @@ func init() {
 }
 
 func main(){
-    t := tree.New(func(a, b int) int { return a - b }) // tree.E = int
+    t := tree.New[tree.E: int](func(a, b int) int { return a - b })
 
     var (
         // For create a pointer of generic type
-        // type added like in variable stuct initialization
+        // type added like in variable struct initialization
         v   = tree.Tree[E: float64]
-        pt1 *tree.Tree[E: int]
+        pt1  *tree.Tree[E: int]
         pt2 = new(tree.Tree[E: int])
     )
 
     // ...
 }
 ```
+
+### Generic prototype with few types slice
+
+External package `tools` with empty types slice
+
+```go
+package tools
+
+var Num1 []type // empty types slice
+var Num2 []type // empty types slice
+var Num3 []type // empty types slice
+
+// Summ is summary of two value with different types
+func Summ(a Num1, b Num2) Num3 {
+	return Num3(a) + Num3(b)
+}
+```
+
+```go
+package main
+
+import "fmt"
+import "tools"
+
+func init() {
+    tools.Num1 = append(tools.Num1, int, float32, float64)
+    tools.Num2 = tools.Num1
+    tools.Num3 = tools.Num1
+}
+
+func main() {
+    fmt.Println(tools.Summ[Num1: int, Num2: float32, Num3: float64](1,2.1))    // show: 3.1
+    fmt.Println(tools.Summ[Num1: float64, Num2: float32, Num3: int](3.14,2.7)) // show: 5
+}
+```
+
+### Useful generics
+
+```go
+package sliceoperation
+
+var T []type // empty types slice
+
+func Reverse(s []T) {
+    first := 0
+    last := len(s) - 1
+    for first < last {
+        s[first], s[last] = s[last], s[first]
+        first++
+        last--
+    }
+}
+
+func Sum(x []T) T {
+	var s T
+	for _, v := range x {
+		s += v
+	}
+	return s
+}
+```
+
+
+
 
 ## Generic from exist code
 
