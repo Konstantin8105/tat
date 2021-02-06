@@ -41,7 +41,8 @@ Type list:
 * no `any`
 * name of variable accepted for [export](https://golang.org/ref/spec#Exported_identifiers)
 
-Acceptable type list initialization:
+### Acceptable type list initialization
+
 ``` go
 // Empty is empty list of types.
 // Exported.
@@ -55,13 +56,32 @@ var ut = []type{uint, uint8, uint16, uint32, uint64}
 var num = types.Numbers
 ```
 
-Not acceptable list of types:
+### Not acceptable list of types
+
 ```go
 var (
     One  type = int // Error : type `type` is not slice of type `[]type`.
     Many []type = _ // Error : slice of types is not limited.
 )
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
