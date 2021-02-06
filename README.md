@@ -33,41 +33,88 @@ For present language design:
 * [float32](https://play.golang.org/p/R6BvhLTbgGN)
 
 
-## Type list manipulation
+## Type slice manipulation
 
-Type list:
+Type slice:
 * always slice of types
 * slice is limited
 * no `any`
 * name of variable accepted for [export](https://golang.org/ref/spec#Exported_identifiers)
 
-### Acceptable type list initialization
+### Acceptable type slice initialization
 
 ``` go
-// Empty is empty list of types.
+// Empty is empty slice of types.
 // Exported.
 var Empty []type
 
-// ut is list of unsigned types.
+// ut is slice of unsigned types.
 // Not exported.
 var ut = []type{uint, uint8, uint16, uint32, uint64}
 
-// num is list of types from package `types`
+// num is slice of types from package `types`
 var num = types.Numbers
+
 ```
 
-### Not acceptable list of types
+### Not acceptable slice of types
 
 ```go
 var (
     One  type = int // Error : type `type` is not slice of type `[]type`.
     Many []type = _ // Error : slice of types is not limited.
 )
+
+type A = One // Error : type `One` is not a type
 ```
 
+### Useful operations
 
+Create a copy of type slice
+```go
+var (
+    N  = []type{float32, float64}
+	NC []type
+)
 
+func init() {
+	NC = N
+}
+```
 
+Append new type
+```go
+var N []type
+
+func init() {
+	N = append(N, float64)
+}
+```
+
+Append type slice to type slice
+```go
+var (
+    floats = []type{float32,float64}
+	ints  = []type{int,int32,int64}
+	mix   []type
+)
+
+func init() {
+	mix = append(mix, floats...)
+	mix = append(mix, ints...)
+}
+```
+
+Append new type to external package
+```go
+package main
+
+import "types"
+
+func init() {
+	types.Numbers = append(types.Numbers, float64)
+}
+```
 
 
 
