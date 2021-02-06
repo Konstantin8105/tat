@@ -1,15 +1,56 @@
-# Type as variable
+# Type of type
 
-Main goals of proposal:
+Main goals of proposal is try to avoid strange too long type clarification `func New[Node NodeConstraint[Edge], Edge EdgeConstraint[Node]] (nodes []Node) *Graph[Node, Edge] ` [code](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md).
 
-* clarify concept **Type as variable**
-* show examples of code looks like generics
+## Minimal example
+
+```go
+package main
+
+import "fmt"
+
+// T is slice of types
+var T = []type{int, float32}
+
+// summ resurn summa of values
+func summ(vs ...T) T {
+	var res T
+	for _, v := range vs{
+		res += v
+	}
+	return res
+}
+
+func main() {
+	fmt.Printf("%d\n", summ(1,2,3,4))              // show "10"
+	fmt.Printf("%.2f\n", summ(1.0, 2.0, 3.0, 4.0)) // show "10.00"
+}
+```
+
+Examples:
+
+* [int](https://play.golang.org/p/ppF1FDjBAqh)
+* [float32](https://play.golang.org/p/R6BvhLTbgGN)
+
+
+
+
+
+
+
 * types list manipulations:
     * initialization
     * append new type
     * remove type from generic type list
 * create generic from exist not prepare generic functions, structs, packages
-* show prototype of approach for avoid strange too long type clarification `func New[Node NodeConstraint[Edge], Edge EdgeConstraint[Node]] (nodes []Node) *Graph[Node, Edge] ` [code](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md).
+
+
+
+
+
+
+
+
 
 
 ## Type list manipulation
