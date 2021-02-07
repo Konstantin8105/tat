@@ -4,8 +4,8 @@ In according to question [template](https://github.com/golang/proposal/blob/mast
 * I create enought Go code and I am not a novice Go programmer.
 * Another programming languages in my experience: C, C++, Java.
 * In my point of view, that design - add new think: *variables have type the type*.
-* Yes, my design is look more native for Go in my point of view. But I see a few nice designs and I add links in my text.
-* Main goal of proposal is try to avoid strange too long type clarification `func New[Node NodeConstraint[Edge], Edge EdgeConstraint[Node]] (nodes []Node) *Graph[Node, Edge] ` [code](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md).
+* Yes, my design is look more native for Go in my point of view. But I see a few nice designs or exampes and I add links in my text.
+* Main goal - try to avoid strange too long type clarification `func New[Node NodeConstraint[Edge], Edge EdgeConstraint[Node]] (nodes []Node) *Graph[Node, Edge] ` [code](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md).
 
 
 
@@ -65,7 +65,7 @@ var Empty []type
 // Not exported.
 var ut = []type{uint, uint8, uint16, uint32, uint64}
 
-// num is slice of types from external package `types`
+// num is slice of types from some external package `types`
 var num = types.Numbers
 ```
 
@@ -204,6 +204,9 @@ func init() {
 func main() {
     fmt.Println(tools.Min[Numeric: int](1,2))          // show: 1
     fmt.Println(tools.Min[Numeric: float32](1.2,-2.1)) // show: -2.1
+
+    Numeric := 12 // initialization variable `Numeric` with same name as types slice
+    fmt.Println(tools.Min[Numeric: float32](1.2,-2.1)) // Error: slice `tools.Min` index `float32` is not valid. Function `tools.Min` is not slice.
 }
 ```
 
@@ -243,11 +246,15 @@ package main
 import "tree"
 
 func init() {
-    tree.E = append(tree.E, int) // registration
+    tree.E = append(tree.E, int, uint) // registration
 }
 
 func main(){
     t := tree.New[tree.E: int](func(a, b int) int { return a - b })
+
+	var t2 tree.E // type of variable will be clarify later
+	t2 = tree.New[tree.E: uint](func(a, b uint) uint { return a - b })
+	// t2 = tree.New[tree.E: int] (...) Error: t2 have type tree[E: uint] already
 
     var (
         // For create a pointer of generic type
@@ -299,6 +306,7 @@ func Counter() func() T {
 	}
 }
 ```
+
 
 ### Generic prototype with few types slice
 
@@ -389,7 +397,7 @@ type Hashmap struct {
 // Example of using:
 // h := hashmap.New[K:int, V:string](hashfn, eqfn)
 func New(hashfn Hashfn, eqfn Eqfn) *Hashmap {
-	// Type parameters of Hashmap deduced as [K, V].
+	// Type clarifications
 	return &Hashmap[K:K, V:V]{hashfn, eqfn, make([]bucket, 16), 0}
 }
 
@@ -402,6 +410,22 @@ func (p *Hashmap) Lookup(key K) (val V, found bool) {
 	}
 	return
 }
+```
+
+**Example 4**
+
+Example with 3 types slices in one struct.
+In struct structure used 2 types slices and 1 in struct method.
+
+```go
+var T1,T2,T3 []type
+type S struct{ t1 T1; t2 T2}
+func (s S) Summ() T3 {
+	return T3(s.t1) + T3(s.t2)
+}
+// example of using: 
+// v := s[T1: int, T2: float32, T3: float64]{t1: 1, t2: 3.14}
+// fmt.Println("%2f\n", v.Summ()) // return type is float64
 ```
 
 ### Useful generics
@@ -430,6 +454,61 @@ func Sum(x []T) T {
 }
 ```
 
+
+### Proposal of implementation on Golang AST 
+
+```go
+var T = []type{int, float64}
+// AST of that line:
+//
+// *ast.GenDecl {
+// Tok: var
+// Specs: []ast.Spec (len = 1) {
+// .  0: *ast.ValueSpec {
+// .  .  Names: []*ast.Ident (len = 1) {
+// .  .  .  0: *ast.Ident {
+// .  .  .  .  Name: "T"
+// .  .  .  }
+// .  .  }
+// .  .  Values: []ast.Expr (len = 1) {
+// .  .  .  0: *ast.CompositeLit {
+// .  .  .  .  Type: *ast.ArrayType {
+// .  .  .  .  .  Elt: *ast.Ident {
+// .  .  .  .  .  .  Name: "type"
+// .  .  .  .  .  }
+// .  .  .  .  }
+// .  .  .  .  Elts: []ast.Expr (len = 2) {
+// .  .  .  .  .  0: *ast.BasicLit {
+// .  .  .  .  .  .  Kind: TYPE
+// .  .  .  .  .  .  Value: "int"
+// .  .  .  .  .  }
+// .  .  .  .  .  1: *ast.BasicLit {
+// .  .  .  .  .  .  Kind: TYPE
+// .  .  .  .  .  .  Value: "float64"
+// .  .  .  .  .  }
+// .  .  .  .  }
+// .  .  .  }
+// .  .  }
+// .  }
+// }
+
+func Min(a, b T) T {
+    if a < b {
+        return a
+    }
+    return b
+}
+// AST of that function:
+//
+// *ast.FuncDecl {
+// .  Name: *ast.Ident {
+// .  .  Name: "Min"
+// .  }
+// .  ........
+// }
+```
+
+ 
 
 
 
