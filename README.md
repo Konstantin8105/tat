@@ -533,8 +533,28 @@ func twice(v pnts) error {
 }
 ```
 
+### Embedded
 
+```go
+var T []type
 
+var _ ftm.Stringer  = T
+
+type S struct{
+    T
+    val int
+}
+
+func(s S) Name() string{
+    return s.String()
+}
+
+// example of use:
+// type sm struct{ name string }
+// func(s sm) String() string { return s.name }
+// v := S[T:sm]{val: 10}
+// fmt.Printf("%s\n", v)
+```
 
 
 ## Generic from exist code
@@ -566,7 +586,7 @@ func init() {
 
 As we see - it is easy for adding new types, for example in future `float128` and other.
 
-### Replace on function level of external package
+### Replace on function level for external package
 
 For example, we found function:
 ```go
@@ -621,3 +641,14 @@ func main() {
     fmt.Println(A32)
 }
 ```
+
+# TODO
+
+I do not think about:
+
+* array of types
+* constant of type
+
+
+
+Feel free for close
