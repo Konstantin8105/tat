@@ -500,7 +500,7 @@ func twice(v nums) nums{
 func main() {
     for _,num := range nums {
         fmt.Printf("%T\n", num)
-	    v := num(3.1415)
+        v := num(3.1415)
         fmt.Printf("%v. twice = %v",v, twice(v))
     }
 }
@@ -512,8 +512,8 @@ or may be for tests
 func Test(t *testing.T){
     for _,num := range nums {
         if num == []float64 {
-			t.Fatalf("not acceptable test")
-		}
+            t.Fatalf("not acceptable test")
+	    }
     }
 }
 ```
@@ -539,9 +539,10 @@ func twice(v pnts) error {
 
 ## Generic from exist code
 
-### Replace on package level
+### Replace on external package level
 
-We have package with math operations [sparse](https://github.com/Konstantin8105/sparse) and we want to use that package but with changing type from `float64` to `float32`.
+We have package with math operations [sparse](https://github.com/Konstantin8105/sparse) 
+and we want to use that package but with changing type from `float64` to `float32`.
 
 ```go
 package main
@@ -550,7 +551,7 @@ package main
 import (
     "go/generic/types"
     "go/math/big"
-    "Konstantin8105/sparse"
+    "github.com/Konstantin8105/sparse"
 )
 
 var Calctype = []type{float32, float64, complex64, complex128, big.NewFloat(0.0).SetPrec(45)}
@@ -565,7 +566,7 @@ func init() {
 
 As we see - it is easy for adding new types, for example in future `float128` and other.
 
-### Replace on function level
+### Replace on function level of external package
 
 For example, we found function:
 ```go
@@ -598,7 +599,7 @@ var Calctype = []type{float32, float64}
 _ = Mult(A,B,C Calctype) // Acceptable for see a new function
 
 func init() {
-    types.ReplaceAllFunc("Konstantin8105/mymath/Mult", float64, Calctype, Mult)
+    types.ReplaceAllFunc("Konstantin8105/mymath.Mult", float64, Calctype, Mult)
     // Now, function acceptable with float32 and float64
     // where:
     //  "Konstantin8105/mymath/Mult" - location of function
@@ -611,112 +612,12 @@ func main() {
     A64 := [][]float64{{2}}
     mymath.Mult(A64,A64,A64)
     fmt.Println(A64)
-    Mult(A64,A64,A64)
+    Mult[Calctype: float64](A64,A64,A64)
     fmt.Println(A64)
 
-    A32 := [][]float64{{2}}
-    // mymath.Mult(A,A,A) // Not acceptable, because function mymath.Mult work only with float64
-    Mult(A,A,A) // Acceptable. Function generated automatically. See function init.
-    fmt.Println(A)
-}
-```
-
-```
-
-var A []type = {...}
-var B []type = {...}
-
-func f(a A) B{
-    return B(a)
-}
-
-type S struct {
-    a A
-    b B
-    C struct {
-        a A
-        b []*A
-    }
-}
-func(s *S) f1(a A, b B) {
-    s.a = a
-    s.C.a = a
-}
-
-func f2(a A)
-```
-
-```golang
-// any
-var any []type = _
-```
-
-```
-var Num = []type{int , float64}
-var GGGG = []type{ uint, string}
-var TV = _ // any
-var TV2 = _ // any
-
-type n struct { Name string}
-
-type named struct {
-    Num
-    n
-}
-
-type namedG struct{
-    GGGG
-    Name string
-}
-
-func operator+(a,b struct{
-    Name string
-}) string {
-    return a.Name + b.Name
-}
-
-type s struct {
-    * named
-    d    TV
-}
-
-type s2 struct {
-    * named
-    d    TV2
-}
-
-func (sv *named) summ(sv2 named) named {
-    return s {
-        Num: sv + sv2,
-        Name : sv.Name + " + " + sv2.Name,
-    }
-}
-
-func (sv *named) operator+(sv2 Num) Num {
-    return  sv.Num + sv2,
-}
-
-func t(){
-    var a s[Num: int, TV: *Map] = 8
-    var a2 s[Num: int, TV: *Map] = 4
-    var a3 s[Num: int, TV: *List] = 4
-    var f s[Num: float64, TV: *Map] = 8.2
-    var b int = 21
-    var af := a + f // FAIL
-    var c := a + b // return int??
-    var fc := f + b  // FAIL
-    var aa2 := a + a2 // return int??
-    var aa3 := a + a3 // return int or fail
-    var d := a.Name + "+" + b.Name
-
-    var r := s[Num: int, TV: *Map] {
-        Name : d
-    }
-    var dd := s[Num: float64]{} // comparable with Go present version??
-    r = c
-
-    fs := func(sv1 s, sv2 s2) s{
-    }
-    print(a, a.Name, a.d)
+    A32 := [][]float32{{2}}
+    // mymath.Mult(A32,A32,A32) // Not acceptable, because function mymath.Mult work only with float64
+    Mult[Calctype: float32](A32,A32,A32) // Acceptable. Function generated automatically. See function init.
+    fmt.Println(A32)
 }
 ```
