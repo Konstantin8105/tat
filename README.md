@@ -455,60 +455,85 @@ func Sum(x []T) T {
 ```
 
 
-### Proposal of implementation on Golang AST 
+### Using in go package `math`
+
+Code based on [function math.Pow](https://golang.org/src/math/pow.go?s=1186:1216#L28)
 
 ```go
-var T = []type{int, float64}
-// AST of that line:
-//
-// *ast.GenDecl {
-// Tok: var
-// Specs: []ast.Spec (len = 1) {
-// .  0: *ast.ValueSpec {
-// .  .  Names: []*ast.Ident (len = 1) {
-// .  .  .  0: *ast.Ident {
-// .  .  .  .  Name: "T"
-// .  .  .  }
-// .  .  }
-// .  .  Values: []ast.Expr (len = 1) {
-// .  .  .  0: *ast.CompositeLit {
-// .  .  .  .  Type: *ast.ArrayType {
-// .  .  .  .  .  Elt: *ast.Ident {
-// .  .  .  .  .  .  Name: "type"
-// .  .  .  .  .  }
-// .  .  .  .  }
-// .  .  .  .  Elts: []ast.Expr (len = 2) {
-// .  .  .  .  .  0: *ast.BasicLit {
-// .  .  .  .  .  .  Kind: TYPE
-// .  .  .  .  .  .  Value: "int"
-// .  .  .  .  .  }
-// .  .  .  .  .  1: *ast.BasicLit {
-// .  .  .  .  .  .  Kind: TYPE
-// .  .  .  .  .  .  Value: "float64"
-// .  .  .  .  .  }
-// .  .  .  .  }
-// .  .  .  }
-// .  .  }
-// .  }
-// }
+package math
 
-func Min(a, b T) T {
-    if a < b {
-        return a
-    }
-    return b
+import powInt "https://github.com/Konstantin8105/pow"
+
+var num = []type{float64, int}
+
+// Pow returns x**y, the base-x exponential of y.
+func Pow(x float64, y num) float64 {
+    // Typical solution for switching by type:
+    // switch v := y.(type) {
+    //     case float64:
+    //         return pow(x,v)
+    //     case int:
+    //         return powInt.En(x,v) // Just for example
+    // }
+    // 
+    // But I think about switching by types slice `num`
+	switch num {
+         case float64:
+             return pow(x,y)
+         case int:
+             return powInt.En(x,y)
+	}
+	panic("Unacceptable type")
 }
-// AST of that function:
-//
-// *ast.FuncDecl {
-// .  Name: *ast.Ident {
-// .  .  Name: "Min"
-// .  }
-// .  ........
-// }
 ```
 
- 
+### Types for-range
+
+I do not know - is it useful?
+```go
+var nums = []type{float64, int}
+
+func twice(v nums) nums{
+	return v * 2
+}
+
+func main() {
+    for _,num := range nums {
+        fmt.Printf("%T\n", num)
+	    v := num(3.1415)
+        fmt.Printf("%v. twice = %v",v, twice(v))
+    }
+}
+```
+
+or may be for tests
+
+```go
+func Test(t *testing.T){
+    for _,num := range nums {
+        if num == []float64 {
+			t.Fatalf("not acceptable test")
+		}
+    }
+}
+```
+
+
+### Pointers in types slice
+
+```go
+var pnts = []type{*int, *float32}
+
+func twice(v pnts) error {
+    if v == nil {
+        return fmt.Errorf("nil")
+    }
+    *v *= 2
+    return nil
+}
+```
+
+
 
 
 
