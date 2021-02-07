@@ -5,7 +5,7 @@ In according to question [template](https://github.com/golang/proposal/blob/mast
 * Another programming languages in my experience: C, C++, Java.
 * In my point of view, that design - add new think: *variables have type the type*.
 * Yes, my design is look more native for Go in my point of view. But I see a few nice designs or exampes and I add links in my text.
-* Main goal - try to avoid strange too long type clarification `func New[Node NodeConstraint[Edge], Edge EdgeConstraint[Node]] (nodes []Node) *Graph[Node, Edge] ` [code](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md).
+* Main goal - **try to avoid strange too long type clarification** `func New[Node NodeConstraint[Edge], Edge EdgeConstraint[Node]] (nodes []Node) *Graph[Node, Edge] ` [code](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md).
 
 
 
