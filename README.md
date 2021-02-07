@@ -1,11 +1,12 @@
 # Type of type
 
-In according to question [template](https://github.com/golang/proposal/blob/master/go2-language-changes.md):
+In according to questions from [template](https://github.com/golang/proposal/blob/master/go2-language-changes.md):
 * I create enought Go code and I am not a novice Go programmer.
 * Another programming languages in my experience: C, C++, Java.
 * In my point of view, that design - add new think: *variables have type the type*.
 * Yes, my design is look more native for Go in my point of view. But I see a few nice designs or exampes and I add links in my text.
 * Main goal - **try to avoid strange too long type clarification** `func New[Node NodeConstraint[Edge], Edge EdgeConstraint[Node]] (nodes []Node) *Graph[Node, Edge] ` [code](https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md).
+* I have not answer on requirement from [doc](https://docs.google.com/document/d/1vrAy9gMpMoS3uaVphB32uVXX4pi-HnNjkMEgyAHX4N4/edit?pli=1#) : `must not generate code at runtime - Go needs to work in environments (e.g. GCP) where run-time code generation is not allowed`
 
 
 
@@ -538,6 +539,7 @@ func twice(v pnts) error {
 ```go
 var T []type
 
+// All types T must be fmt.Stringer
 var _ ftm.Stringer  = T
 
 type S struct{
